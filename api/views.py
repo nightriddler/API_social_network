@@ -1,8 +1,9 @@
 from django.shortcuts import get_object_or_404
-from django_filters import rest_framework as filters_df
-from rest_framework import filters, viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, generics, status, viewsets
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
 
 from .models import Comment, Follow, Group, Post
 from .permissions import IsOwnerOrReadOnly
@@ -14,8 +15,8 @@ class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-    filter_backends = [filters_df.DjangoFilterBackend, ]
-    filterset_fields = ['text', 'group', ]
+    filter_backends = [DjangoFilterBackend, ]
+    filterset_fields = ['group', ]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -30,30 +31,39 @@ class CommentViewSet(viewsets.ModelViewSet):
     ]
 
     def get_queryset(self, **kwargs):
-        post_id = self.kwargs.get("post_id")
+        post_id = self.kwargs.get('post_id')
         post = get_object_or_404(Post, id=post_id)
         return post.comments.all()
 
     def perform_create(self, serializer):
+        get_object_or_404(Post, id=self.kwargs.get('post_id'))
         serializer.save(author=self.request.user)
 
 
-class GroupViewSet(viewsets.ModelViewSet):
+class GroupViewSet(generics.ListCreateAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, ]
+    permission_classes = [IsAuthenticatedOrReadOnly, ] 
 
 
-class FollowViewSet(viewsets.ModelViewSet):
+class FollowViewSet(generics.ListCreateAPIView):
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
     permission_classes = [IsAuthenticated, ]
 
     filter_backends = [filters.SearchFilter]
-    search_fields = ['user__username', ]
+    search_fields = ['user__username', 'following__username', ]
 
     def get_queryset(self):
         return Follow.objects.filter(following=self.request.user)
 
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if request.user.username == request.data.get('following'):
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
         serializer.save(user=self.request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
