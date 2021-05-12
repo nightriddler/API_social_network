@@ -43,7 +43,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 class GroupViewSet(generics.ListCreateAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, ] 
+    permission_classes = [IsAuthenticatedOrReadOnly, ]
 
 
 class FollowViewSet(generics.ListCreateAPIView):
