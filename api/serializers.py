@@ -39,6 +39,12 @@ class FollowSerializer(serializers.ModelSerializer):
         queryset=User.objects.all()
     )
 
+    def validate(self, data):
+        if self.context.get('request').user == data['following']:
+            raise serializers.ValidationError(
+                'You can not sign up for yourself.')
+        return data
+
     class Meta:
         fields = '__all__'
         model = Follow
