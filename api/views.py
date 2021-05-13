@@ -45,7 +45,6 @@ class GroupViewSet(generics.ListCreateAPIView, viewsets.GenericViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly, ]
 
 
-# class FollowViewSet(generics.ListCreateAPIView):
 class FollowViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -63,14 +62,3 @@ class FollowViewSet(
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
-    # def create(self, request, *args, **kwargs):
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     if request.user.username == request.data.get('following'):
-    #         return Response(
-    #             serializer.errors,
-    #             status=status.HTTP_400_BAD_REQUEST
-    #         )
-    #     serializer.save(user=self.request.user)
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
