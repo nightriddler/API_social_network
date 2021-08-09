@@ -13,7 +13,7 @@
 
 ### Развертка проекта
 1. Клонируем репозиторий `git clone <ссылка_на_репозиторий>`
-2. Устанавливаем виртуальное окружение `python -m venv venv` и заходим в него `source venv/Scripts/activate`
+2. Устанавливаем виртуальное окружение `python -m venv venv` и активируем его `source venv/Scripts/activate`
 3. Устанавливаем зависимости `pip install -r requirements.txt` и запускаем сервер `python manage.py runserver`
 
 ### Документация
